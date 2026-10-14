@@ -30,7 +30,7 @@ heliolinc_core = "16a1ad62-fb2e-42e9-a61f-8ebe2a9105dd"
 [sources]
 Kepler = {rev = "main", url = "https://github.com/samncorn/Kepler.git"}
 dbscan = {rev = "main", url = "git@github.com:samncorn/dbscan.jl.git"}
-heliolinc_core = {rev = "main", url = "git@github.com:uiuc-ae-space/heliolinc_jl_core.git"}
+heliolinc_core = {rev = "main", url = "git@github.com:samncorn/heliolinc3d_core.jl.git"}
 
 [compat]
 ArgParse = "1.2.0"

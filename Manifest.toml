@@ -6,10 +6,10 @@ project_hash = "cb8d76da736e65dbff82ab627e69fce477bea198"
 
 [[deps.Accessors]]
 deps = ["CompositionsBase", "ConstructionBase", "Dates", "InverseFunctions", "MacroTools"]
-git-tree-sha1 = "3b86719127f50670efe356bc11073d84b4ed7a5d"
+git-tree-sha1 = "7063ad1083578215c7c4bf410368150abe8d5524"
 registries = "General"
 uuid = "7d9f7c33-5ae7-4f3b-8dc6-eff91059b697"
-version = "0.1.42"
+version = "0.1.45"
 
     [deps.Accessors.extensions]
     AxisKeysExt = "AxisKeys"
@@ -132,10 +132,11 @@ uuid = "6b39b394-51ab-5f42-8807-6242bab2b4c2"
 version = "0.8.6"
 
 [[deps.CommonSolve]]
-git-tree-sha1 = "0eee5eb66b1cf62cd6ad1b460238e60e4b09400c"
+deps = ["PrecompileTools"]
+git-tree-sha1 = "6c389fa857f6ca5a95474b52a52023fd77f24cb7"
 registries = "General"
 uuid = "38540f10-b2f7-11e9-35d8-d573e4eb0ff2"
-version = "0.2.4"
+version = "0.2.14"
 
 [[deps.CommonSubexpressions]]
 deps = ["MacroTools"]
@@ -866,10 +867,10 @@ version = "1.3.1"
 
 [[deps.Roots]]
 deps = ["Accessors", "CommonSolve", "Printf"]
-git-tree-sha1 = "8a433b1ede5e9be9a7ba5b1cc6698daa8d718f1d"
+git-tree-sha1 = "3eff988b9bd09543783e2e051b0a1eef11f65c2d"
 registries = "General"
 uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
-version = "2.2.10"
+version = "2.3.0"
 
     [deps.Roots.extensions]
     RootsChainRulesCoreExt = "ChainRulesCore"
@@ -1177,9 +1178,9 @@ version = "0.4.0"
 
 [[deps.heliolinc_core]]
 deps = ["Dates", "Kepler", "LinearAlgebra", "LoggingExtras", "NearestNeighbors", "Printf", "ProgressMeter", "Roots", "Rotations", "StaticArrays", "StatsBase", "dbscan"]
-git-tree-sha1 = "ad2127a80a9ba57fb0c0dbbe9ca447da2a88a9c0"
+git-tree-sha1 = "190825e04b6fa38ac983d92782cb6eaf828c72ac"
 repo-rev = "main"
-repo-url = "git@github.com:uiuc-ae-space/heliolinc_jl_core.git"
+repo-url = "git@github.com:samncorn/heliolinc3d_core.jl.git"
 uuid = "16a1ad62-fb2e-42e9-a61f-8ebe2a9105dd"
 version = "0.1.0"
 
