@@ -1,5 +1,8 @@
 name = "HelioLinC"
 uuid = "0e26e3aa-62f4-483c-83ee-2836329c1503"
+version = "0.0.1"
+authors = ["Samuel Cornwall"]
+
 
 [deps]
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
