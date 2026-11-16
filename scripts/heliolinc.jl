@@ -16,27 +16,11 @@ using ProgressMeter
 using Dates
 # using InlineStrings
 
+using SPICE
+using Downloads: download
+
 import HelioLinC as hl
 import heliolinc_core as hlc
-
-# const default_out_path = "./heliolinc_output"
-# const default_cluster_radius   = 0.001
-# const default_max_rms          = Inf
-# const default_time_scale = 1.0
-# const default_dt_min    = 5 * 60.0 / 86400.0 # five minute minimum tests well
-# const default_dt_max    = 2.0 / 24.0
-# const default_e_min     = 0.0
-# const default_e_max     = Inf
-# const default_i_min     = 0.0
-# const default_i_max     = 90.0
-# const default_v_max     = 2.0
-# const default_r_min     = 0.0
-# # const default_rho_min   = 0.01
-# const default_n_threads = 1
-# const default_n_proc    = 1
-# const default_max_pts   = typemax(Int)
-# const default_min_pts   = 3
-# const default_angle_iters = 0
 
 function parse_cli()
     s = ArgParseSettings()
@@ -48,6 +32,10 @@ function parse_cli()
 
         "--hypothesis"
         help = "path to hypothesis grid file. Overrides config value"
+        arg_type = String
+
+        "--observer"
+        help = "MPC obscode indicating the observer. Overrides config value"
         arg_type = String
 
         "--exclude"
@@ -138,17 +126,6 @@ function parse_cli()
         "--n-proc"
         help = "number of hypothesis to run in parallel. overrides config."
         arg_type = Int
-        # default = default_n_proc
-
-        # "--clustering"
-        # help = "vectors to cluster states in. either "
-        # arg_type = String
-        # default = "rv"
-
-        # "--model"
-        # help = "heliocentric distance model"
-        # arg_type = String
-        # default = "quadratic"
 
         "--max-pts"
         help = "maximum number of points an arrow can have in its neighborhood before terminating the hypothesis"
@@ -191,18 +168,21 @@ function (@main)(_args)
         rm(f)
     end
 
-    # file_stem = "csv"
-    file_stem = "arr"
-
     # set up the logger(s)
     open(joinpath(out_path, "heliolinc.log"), "w") do log_io
         log_lvl = args["debug"] ? Logging.Debug : Logging.Info
         logger = MinLevelLogger(FileLogger(log_io), log_lvl)
 
         det_cols = config["detections"]["columns"]
-        obs_cols = config["observer"]["columns"]
+        # obs_cols = config["observer"]["columns"]
 
         with_logger(logger) do
+            cache_path = joinpath(@__DIR__, "../.cache")
+            hl.Observer.furnish_spice_mpc(cache_path)
+
+            @info "loading MPC Observatory positions..."
+            observatories = hl.Observer.load_observatories(cache_path)
+
             cluster_radius  = resolve_program_parameters(args["cluster-radius"], config, ["clustering", "radius"],    1e-3)
             max_pts   = resolve_program_parameters(args["max-pts"], config, ["clustering", "max_pts"], typemax(Int))
             min_pts   = resolve_program_parameters(args["min-pts"], config, ["clustering", "min_pts"], 3)
@@ -219,6 +199,11 @@ function (@main)(_args)
             v_max     = resolve_program_parameters(args["v-max"],     config, ["tracklet", "v_max"],     3.0)
             rho_min   = resolve_program_parameters(args["range-min"], config, ["tracklet", "range_min"], 0.01)
 
+            obscode = resolve_program_parameters(args["observer"], config, ["observer", "code"], nothing)
+            if isnothing(obscode)
+                throw("No obscode provided")
+            end
+
             # hyp_path = !isnothing(args["hypothesis"]) ? args["hypothesis"] : config["hypothesis"]["file"]
             hyp_path = resolve_program_parameters(args["hypothesis"], config, ["hypothesis", "file"], nothing)
 
@@ -226,7 +211,6 @@ function (@main)(_args)
             # angle_iters = haskey(config["tracklet"], "angle_iters") && args["angle-iters"] == default_angle_iters  ? config["tracklet"][ "angle_iters"] : args["angle-iters"]
             rms_max     = resolve_program_parameters(args["max-rms"], config, ["tracklet", "max_rms"], Inf)
             angle_iters = resolve_program_parameters(args["angle-iters"], config, ["tracklet", "angle_iters"], 0)
-
 
             @info "clustering radius            : $(cluster_radius)"
             @info "minimum tracklet time        : $(dt_min)"
@@ -243,7 +227,15 @@ function (@main)(_args)
             @info "maximum number of cluster points: $(max_pts)"
 
             det_files = config["detections"]["files"]
-            det_df = Arrow.Table(det_files) |> DataFrame
+            dformat   = config["detections"]["format"]
+
+            det_df = if dformat == "arr"
+                Arrow.Table(det_files) |> DataFrame
+            elseif dformat == "csv"
+                CSV.read(det_files, DataFrame)
+            else
+                throw("invalid detection file format specifier passed")
+            end
 
             ra     = det_df[:, det_cols["ra"]]
             dec    = det_df[:, det_cols["dec"]]
@@ -274,21 +266,20 @@ function (@main)(_args)
             cluster_params = hlc.ClusteringParams(cluster_radius, timescale, n_threads, rms_max, min_pts, max_pts)
             orbit_bounds   = hlc.OrbitBounds(r_min, e_min, e_max, rho_min, i_min, i_max)
 
-            # hyp_start, hyp_end = resolve_program_parameters(nothing, config, ["hypothesis", "range"], (1, nrow(hypotheses)))
-            # hypotheses = hypotheses[hyp_start:hyp_end]
-
             # load the observer
-            observer = hl.load_observer_interp(config["observer"]["file"], obs_cols)
-            obs = try
-                [observer(t) for t in times]
-            catch _
-                throw("loading observer failed. time range = [$t0, $tf], config = $(args["config"])")
+            # cache the position for each unique time
+            obs_ref = hl.Observer.observatory_position(observatories[obscode]...)
+            obs_cache = Dict{Float64, SVector{3, Float64}}()
+            for t in times
+                if haskey(obs_cache, t)
+                    continue
+                else
+                    obs_cache[t] = hl.Observer.get_observatory_position_heliocentric(t, obs_ref) / hl.AU2KM
+                end
             end
-            
-            # convert dataframe columns to detections structs
 
-            # exclude path is not configurable via config file, only command line
-            # exclude_path = args["exclude"]
+            obs = [obs_cache[t] for t in times]
+
             exclude_path = resolve_program_parameters(args["exclude"], config, ["detections", "exclude_path"], nothing)
             @info "loading preattributed detections to exclude from $(exclude_path)..."
 
@@ -306,8 +297,6 @@ function (@main)(_args)
                 @info "$(sum(exc)) preattributed detections excluded"
                 exc
             end
-
-            
 
             prog = Progress(length(hypotheses), enabled = args["progress-bar"])
             chunksize = (length(hypotheses) ÷ n_proc) + 1 

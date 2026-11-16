@@ -41,5 +41,6 @@ include("HelioLinC/IO.jl")
 # include("HelioLinC/herget.jl")
 include("HelioLinC/interp.jl")
 # include("HelioLinC/linkages.jl")
+include("HelioLinC/observer.jl")
 
 end # module HelioLinC

@@ -2,7 +2,7 @@
 
 julia_version = "1.13.0"
 manifest_format = "2.1"
-project_hash = "cb8d76da736e65dbff82ab627e69fce477bea198"
+project_hash = "f2502410ae84572af4e85a5d891f66fcf9a29fc2"
 
 [[deps.Accessors]]
 deps = ["CompositionsBase", "ConstructionBase", "Dates", "InverseFunctions", "MacroTools"]
@@ -412,7 +412,7 @@ uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 version = "1.10.19"
 
 [[deps.HelioLinC]]
-deps = ["ArgParse", "Arrow", "AstroTime", "CSV", "DataFrames", "DataInterpolations", "Dates", "HDF5", "InlineStrings", "Kepler", "LinearAlgebra", "LoggingExtras", "NearestNeighbors", "Printf", "ProgressMeter", "Random", "Reexport", "Rotations", "SQLite", "StaticArrays", "StatsBase", "TOML", "dbscan", "heliolinc_core"]
+deps = ["ArgParse", "Arrow", "AstroTime", "CSV", "DataFrames", "DataInterpolations", "Dates", "Downloads", "HDF5", "InlineStrings", "Kepler", "LinearAlgebra", "LoggingExtras", "NearestNeighbors", "Printf", "ProgressMeter", "Random", "Reexport", "Rotations", "SPICE", "SQLite", "StaticArrays", "StatsBase", "TOML", "dbscan", "heliolinc_core"]
 path = "."
 uuid = "0e26e3aa-62f4-483c-83ee-2836329c1503"
 version = "0.0.0"
