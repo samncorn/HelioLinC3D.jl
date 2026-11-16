@@ -1,1 +1,0 @@
-#= script for generating hypothesis grids (and corresponding config files) =#
