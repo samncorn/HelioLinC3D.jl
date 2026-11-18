@@ -12,7 +12,7 @@
 The `heliolinc.jl` program ingests optical measurments and a set of search parameters, generating a set of files with candidate linkages.
 
 ```
-Julia -t [n_threads] path_to_project/scripts/heliolinc.jl [args...]
+julia -t [n_threads] path_to_project/scripts/heliolinc.jl [args...]
 ```
 where path_to_project is the path to the downloaded repository.
 
@@ -23,7 +23,7 @@ When running for the first time, the clustering program will download ancillary 
 The candidate linkages typically have a large amount of overlap and junk, requiring further processing with the `filter-linkages.jl` program, run in the same manner as the `heliolinc.jl` program. 
 
 ```
-Julia -t [n_threads] path_to_project/scripts/filter-linkages.jl [args...]
+julia -t [n_threads] path_to_project/scripts/filter-linkages.jl [args...]
 ```
 
 ## Basic Usage
